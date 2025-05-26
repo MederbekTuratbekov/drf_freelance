@@ -7,7 +7,7 @@ from .models import UserProfile, Skill, Category, Project, Offer, Review
 from .serializers import (UserProfileSerializer,
                           SkillSerializer, CategorySerializer,
                           ProjectSerializer, ProjectDetailSerializer,
-                          OfferSerializer, ReviewSerializer)
+                          OfferSerializer, ReviewSerializer, UserSerializer)
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken

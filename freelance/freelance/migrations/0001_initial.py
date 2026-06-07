@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ('avatar', models.ImageField(blank=True, null=True, upload_to='')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
-                ('skills', models.ManyToManyField(to='freelance_app.skill')),
+                ('skills', models.ManyToManyField(to='freelance.skill')),
             ],
             options={
                 'verbose_name': 'user',
@@ -78,9 +78,9 @@ class Migration(migrations.Migration):
                 ('budget', models.PositiveIntegerField()),
                 ('deadline', models.DateField()),
                 ('status', models.CharField(choices=[('open', 'open'), ('in_progress', 'in_progress'), ('completed', 'completed'), ('cancelled', 'cancelled')], default='open')),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='freelance_app.category')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='freelance.category')),
                 ('client', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('skills_required', models.ManyToManyField(to='freelance_app.skill')),
+                ('skills_required', models.ManyToManyField(to='freelance.skill')),
             ],
         ),
         migrations.CreateModel(
@@ -93,7 +93,7 @@ class Migration(migrations.Migration):
                 ('proposed_budget', models.PositiveIntegerField(blank=True, null=True)),
                 ('proposed_deadline', models.DateField(blank=True, null=True)),
                 ('freelancer', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='freelance_app.project')),
+                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='freelance.project')),
             ],
         ),
         migrations.CreateModel(
@@ -103,7 +103,7 @@ class Migration(migrations.Migration):
                 ('comment', models.TextField(blank=True, null=True)),
                 ('rating_review', models.IntegerField(choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')])),
                 ('owner_review', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='owner_reviewer', to=settings.AUTH_USER_MODEL)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='freelance_app.project')),
+                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='freelance.project')),
                 ('target', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='target', to=settings.AUTH_USER_MODEL)),
             ],
         ),

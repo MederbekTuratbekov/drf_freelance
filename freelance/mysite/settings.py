@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'freelance_app',
+    'freelance',
     'rest_framework',
     'django_filters',
     'allauth',
@@ -47,7 +47,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-ROOT_URLCONF = 'freelance.urls'
+ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATES = [
     {
@@ -64,7 +64,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'freelance.wsgi.application'
+WSGI_APPLICATION = 'mysite.wsgi.application'
 
 DATABASES = {
     'default': {
@@ -112,7 +112,7 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'freelance_app.UserProfile'
+AUTH_USER_MODEL = 'freelance.UserProfile'
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',

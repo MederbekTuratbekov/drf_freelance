@@ -36,14 +36,7 @@ class CustomLoginView(TokenObtainPairView):
 
 
 class LogoutView(generics.GenericAPIView):
-    def post(self, request, *args, **kwargs):
-        try:
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-            return Response(status=status.HTTP_205_RESET_CONTENT)
-        except Exception:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
@@ -74,7 +67,7 @@ class ProjectAPIView(generics.ListCreateAPIView):
 class ProjectDetailAPIView(generics.RetrieveAPIView):
     queryset = Project.objects.all()
     serializer_class = ProjectDetailSerializer
-    permission_classes = [permissions.IsAuthenticated, CheckIsClient]
+    permission_classes = [permissions.IsAuthenticated]
 
 
 class UserProjectsListAPIView(generics.ListAPIView):

@@ -64,6 +64,11 @@ class Offer(models.Model):
     proposed_budget = models.DecimalField(max_digits=7, decimal_places=0, blank=True, null=True)
     proposed_deadline = models.DateField(blank=True, null=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['project', 'freelancer'], name='unique_offer_per_freelancer_project')
+        ]
+
     def __str__(self):
         return f'{self.freelancer} {self.project}'
 
@@ -74,6 +79,11 @@ class Review(models.Model):
     rating_review = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
     owner_review = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='owner_reviewer')
     target = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='target')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['project', 'owner_review', 'target'], name='unique_review_per_project_pair')
+        ]
 
     def __str__(self):
         return f'{self.owner_review} {self.project} {self.rating_review}'

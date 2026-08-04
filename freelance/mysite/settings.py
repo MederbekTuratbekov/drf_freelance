@@ -90,7 +90,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en'
 USE_I18N = True
-USE_L10N = True
+
 LANGUAGES = [
     ('en', 'English'),
     ('ru', 'Russian'),
@@ -117,7 +117,7 @@ AUTH_USER_MODEL = 'freelance.UserProfile'
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # IsAuthenticated / AllowAny - до продакшн
+        'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',

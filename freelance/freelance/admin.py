@@ -10,6 +10,9 @@ class SocialLinksInlines(admin.TabularInline):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     inlines = [SocialLinksInlines]
+    list_display = ('username', 'role', 'email')
+    fields = ('username', 'email', 'password', 'first_name', 'last_name', 'role', 'bio', 'avatar', 'skills')
+    filter_horizontal = ('skills',)
 
 @admin.register(Skill, Category, Project, Offer)
 class TranslateAdmin(TranslationAdmin):

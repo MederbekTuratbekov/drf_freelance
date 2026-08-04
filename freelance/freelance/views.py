@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions, generics, status, serializers
+from rest_framework.permissions import AllowAny
 from .permissions import CheckIsClient, CheckIsFreelancer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -118,6 +119,7 @@ class ReviewCreateAPIView(generics.CreateAPIView):
 class CategoryListAPIView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
 
 
 class CategoryRetrieveAPIView(generics.RetrieveAPIView):
@@ -128,3 +130,4 @@ class CategoryRetrieveAPIView(generics.RetrieveAPIView):
 class SkillListAPIView(generics.ListAPIView):
     queryset = Skill.objects.all()
     serializer_class = SkillSerializer
+    permission_classes = [AllowAny]

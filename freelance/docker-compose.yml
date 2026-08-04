@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
 
   web:
@@ -10,8 +8,8 @@ services:
       - .:/app
       - /home/ubuntu/mysite/mysite/static_files:/app/staticfiles
       - media_volume:/app/media
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     depends_on:
       - db
 

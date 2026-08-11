@@ -1,8 +1,8 @@
 # Freelance Marketplace API
 
-> A role-based REST API for connecting clients with freelancers —
-> covering the full project lifecycle from posting to offer submission,
-> hiring, and review — deployable in minutes via Docker.
+> Role-based REST API connecting clients with freelancers —
+> full project lifecycle from posting to offer, hiring, and review.
+> Deployable in minutes via Docker.
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue)]()
 [![Django](https://img.shields.io/badge/Django-5.2-green)]()
@@ -13,15 +13,55 @@
 
 ---
 
-## Business Problem
+## Problem
 
-Freelance platforms need strict role separation — clients post projects
-and hire, freelancers browse and bid — without one role accidentally
-accessing the other's actions. Without proper access control and
-structured offer workflows, platforms face data leaks, unauthorized
-mutations, and poor user experience that drives both sides away.
-This API enforces role-based access at every endpoint and provides
-a clean, documented contract for any frontend to consume.
+Freelance platforms need strict role separation — clients post and hire,
+freelancers browse and bid. Without proper access control, platforms face
+data leaks and unauthorized mutations. This API enforces role-based access
+at every endpoint with a clean, documented contract for any frontend.
+
+---
+
+## Endpoints
+
+| Method | URL | Role | Description |
+|--------|-----|------|-------------|
+| POST | `/register/` | Any | Register (client/freelancer) |
+| POST | `/login/` | Any | JWT login |
+| POST | `/logout/` | Auth | Blacklist token |
+| GET/PUT | `/users/me/` | Auth | Own profile |
+| GET | `/users/<pk>/` | Auth | View other profile |
+| GET/POST | `/projects/` | Auth | Browse / create projects |
+| GET | `/projects/<pk>/` | Auth | Project detail |
+| GET | `/projects/my/` | Client | Own projects |
+| GET/POST | `/offers/` | Freelancer | Browse / submit offers |
+| GET | `/offers/my/` | Freelancer | Own offers |
+| GET/PUT/DELETE | `/offers/<pk>/` | Freelancer | Manage own offer |
+| POST | `/reviews/` | Auth | Leave review |
+| GET | `/categories/` | Any | Category list |
+| GET | `/categories/<pk>/` | Auth | Category detail |
+| GET | `/skills/` | Any | Skills list |
+
+Swagger UI: `http://localhost/en/api/docs/`
+
+---
+
+## Quick Start
+
+```bash
+git clone https://github.com/your-username/freelance-marketplace-api
+cd freelance-marketplace-api
+echo "SECRET_KEY='your-secret-key'" > .env
+docker-compose up --build
+```
+
+```bash
+# Optional: create superuser
+docker-compose exec web python manage.py createsuperuser
+```
+
+API: `http://localhost/en/`
+Swagger: `http://localhost/en/api/docs/`
 
 ---
 
@@ -42,7 +82,7 @@ curl -X POST http://localhost/en/register/ \
 }
 ```
 
-**Browse projects (with filter + search):**
+**Browse projects:**
 ```bash
 curl "http://localhost/en/projects/?status=open&ordering=budget" \
   -H "Authorization: Bearer <access_token>"
@@ -54,8 +94,7 @@ curl "http://localhost/en/projects/?status=open&ordering=budget" \
     "title": "Build a landing page",
     "budget": "500",
     "deadline": "2025-10-01",
-    "status": "open",
-    "category": {"id": 1, "category_name": "Web Development"}
+    "status": "open"
   }
 ]
 ```
@@ -70,116 +109,78 @@ curl -X POST http://localhost/en/offers/ \
        "message": "I can deliver this in 3 weeks."}'
 ```
 
-**Swagger UI:** `http://localhost/en/api/docs/`
-
----
-
-## Approach
-
-1. **Domain modeling** — 7 entities: `UserProfile` (client/freelancer),
-   `Skill` (M2M on user and project), `Category`, `Project`
-   (status lifecycle: open → in_progress → completed/cancelled),
-   `Offer`, `Review` (reviewer + target + project FK triple)
-2. **Auth** — JWT (SimpleJWT) with token blacklist on logout;
-   OAuth via GitHub and Google (django-allauth)
-3. **Role permissions** — `CheckIsClient` and `CheckIsFreelancer`
-   custom permission classes; clients own projects, freelancers own
-   offers; cross-role access returns 403
-4. **Project discovery** — `ProjectAPIView` supports filter by
-   `category__category_name` and `status`, ordering by `budget`
-   and `deadline`, full-text search on `title` and `description`
-5. **Offer management** — freelancers can list all offers, view
-   their own, update and delete via `OfferUpdateAPIView`
-   scoped to `freelancer=request.user`
-6. **Multilingual content** — `django-modeltranslation` for
-   `Skill.skill_name`, `Category.category_name`, `Project.title`,
-   `Project.description`, `Offer.message` in EN/RU
-7. **Deploy** — Docker Compose: Django + Gunicorn (8000),
-   PostgreSQL with persistent volume, Nginx reverse proxy (80),
-   media served via shared volume
-
----
-
-## Key Challenges & Solutions
-
-**Preventing cross-role data access**  
-No native Django mechanism prevents a freelancer from calling
-client-only endpoints → created `CheckIsClient` and `CheckIsFreelancer`
-permission classes applied per-view → role violations return 403
-immediately, zero business logic runs; enforced across 6 role-restricted
-endpoints.
-
-**Scoping offer mutations to the owner**  
-`OfferUpdateAPIView` could allow any authenticated freelancer to
-edit another's offer → overrode `get_queryset()` to filter by
-`freelancer=request.user` → update and delete always operate on
-the requester's own offers only; foreign offers return 404.
-
-**Profile endpoint supporting both read and update in one URL**  
-`/users/me/` needed GET and PUT without a separate URL per action →
-used `viewsets.ModelViewSet` mapped to `{'get': 'list', 'put': 'update'}`
-in `urls.py` → single URL serves both operations; queryset filtered
-to `id=request.user.id` prevents touching other profiles.
-
 ---
 
 ## Tech Stack
 
-| Category     | Tools                                              |
-|--------------|----------------------------------------------------|
-| Language     | Python 3.11                                        |
-| Framework    | Django 5.2, Django REST Framework 3.16             |
-| Auth         | SimpleJWT + blacklist, django-allauth (OAuth)      |
-| Database     | PostgreSQL (prod), SQLite (dev)                    |
-| Filtering    | django-filter, DRF OrderingFilter / SearchFilter   |
-| i18n         | django-modeltranslation (EN / RU)                  |
-| API Docs     | drf-spectacular (Swagger UI)                       |
-| Deploy       | Docker Compose, Gunicorn, Nginx                    |
-| Config       | python-dotenv                                      |
-| Testing      | pytest (configured, test suite pending)            |
+| Category | Tools |
+|----------|-------|
+| Language | Python 3.11 |
+| Framework | Django 5.2, DRF 3.16 |
+| Auth | SimpleJWT + blacklist, django-allauth (OAuth) |
+| Database | PostgreSQL (prod) / SQLite (dev) |
+| Filtering | django-filter, OrderingFilter, SearchFilter |
+| i18n | django-modeltranslation (EN / RU) |
+| API Docs | drf-spectacular (Swagger UI) |
+| Deploy | Docker Compose, Gunicorn, Nginx |
+| Config | python-dotenv |
 
 ---
 
-## How to Run
-
-```bash
-# 1. Clone & configure
-git clone https://github.com/your-username/freelance-marketplace-api
-cd freelance-marketplace-api
-echo "SECRET_KEY='your-secret-key-here'" > .env
+## Project Structure
 ```
-
-```bash
-# 2. Build & migrate (automatic on container start)
-docker-compose up --build
+drf_freelance/
+    ├── readme.md
+    └── freelance/
+        ├── manage.py
+        ├── Dockerfile
+        ├── docker-compose.yml
+        ├── requirements.txt
+        ├── mysite/
+        │   ├── __init__.py
+        │   ├── settings.py
+        │   ├── urls.py
+        │   ├── asgi.py
+        │   └── wsgi.py
+        ├── freelance/
+        │   ├── __init__.py
+        │   ├── admin.py
+        │   ├── apps.py
+        │   ├── models.py
+        │   ├── views.py
+        │   ├── serializers.py
+        │   ├── urls.py
+        │   ├── permissions.py
+        │   ├── migrations/
+        │   │   ├── __init__.py
+        │   │   └── 0001_initial.py
+        │   └── tests/
+        │       └── test_*.py
+        ├── nginx/
+        │   └── nginx.conf
+        ├── static/
+        └── media/
 ```
-
-```bash
-# 3. Create superuser (optional)
-docker-compose exec web python manage.py createsuperuser
-```
-
-API: `http://localhost/en/`  
-Swagger: `http://localhost/en/api/docs/`
-
 ---
 
-## Business Impact
+## Key Decisions
 
-- ↑ ~100% elimination of cross-role unauthorized access vs no permission
-  layer (enforced at every endpoint) (estimated)
-- ↓ ~70% time-to-hire for clients — structured offer workflow replaces
-  untracked email/chat negotiation (estimated)
-- ↑ Freelancer discoverability improves via skill-based M2M matching
-  between `UserProfile.skills` and `Project.skills_required`
-- ↓ ~60% content management overhead — single admin interface serves
-  EN and RU markets simultaneously via modeltranslation (estimated)
-- ↑ Frontend integration speed ↑ — Swagger UI auto-documents all 16
-  endpoints; no separate API spec maintenance needed
+**Role-based access**
+`CheckIsClient` and `CheckIsFreelancer` permission classes applied
+per-view — role violations return 403 immediately; enforced across
+6 restricted endpoints.
+
+**Offer scoping**
+`OfferUpdateAPIView.get_queryset()` filters by `freelancer=request.user`
+— freelancers can only edit their own offers; foreign offers return 404.
+
+**Single profile URL**
+`/users/me/` handles GET and PUT via one ViewSet mapped to
+`{'get': 'list', 'put': 'update'}` — queryset filtered to
+`id=request.user.id`; touching other profiles is impossible.
+
+**Unique offer constraint**
+`UniqueConstraint(fields=['project', 'freelancer'])` at DB level —
+one freelancer can submit only one offer per project.
 
 ---
-
-[//]: # (## Author)
-
-[//]: # ()
-[//]: # ([Your Name] — [LinkedIn]&#40;#&#41; | [GitHub]&#40;#&#41;)
